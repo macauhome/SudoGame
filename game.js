@@ -21,6 +21,7 @@ class SudokuGame {
 
         this.initializeGame();
         this.bindEvents();
+        this.initializeI18n();
     }
 
     initializeGame() {
@@ -100,6 +101,50 @@ class SudokuGame {
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.sudoku-grid') && !e.target.closest('.number-buttons')) {
                 this.deselectCell();
+            }
+        });
+    }
+
+    initializeI18n() {
+        // Wait for i18n to be ready
+        const checkI18n = () => {
+            if (window.i18n && window.i18n.translations) {
+                // Language selector event
+                const languageSelector = document.getElementById('language-selector');
+                if (languageSelector) {
+                    languageSelector.addEventListener('change', (e) => {
+                        window.i18n.setLanguage(e.target.value);
+                    });
+                }
+                
+                // Set global reference for i18n callbacks
+                window.sudokuGame = this;
+            } else {
+                setTimeout(checkI18n, 100);
+            }
+        };
+        checkI18n();
+    }
+
+    onLanguageChange() {
+        // Update difficulty display
+        const difficultyMap = {
+            'easy': 'difficulty.easy',
+            'medium': 'difficulty.medium',
+            'hard': 'difficulty.hard',
+            'expert': 'difficulty.expert'
+        };
+        
+        const currentDifficultyElement = document.getElementById('current-difficulty');
+        if (currentDifficultyElement && difficultyMap[this.currentDifficulty]) {
+            currentDifficultyElement.textContent = window.i18n.t(difficultyMap[this.currentDifficulty]);
+        }
+
+        // Update language selector options
+        document.querySelectorAll('#language-selector option').forEach(option => {
+            const key = option.getAttribute('data-i18n');
+            if (key) {
+                option.textContent = window.i18n.t(key);
             }
         });
     }
@@ -425,7 +470,8 @@ class SudokuGame {
     }
 
     solvePuzzle() {
-        if (confirm('Are you sure you want to solve the puzzle? This will end the current game.')) {
+        const message = window.i18n ? window.i18n.t('messages.solveConfirm') : 'Are you sure you want to solve the puzzle? This will end the current game.';
+        if (confirm(message)) {
             this.playerGrid = this.solver.copyGrid(this.currentSolution);
             this.playerNotes = {};
             this.isGameComplete = true;
@@ -437,14 +483,15 @@ class SudokuGame {
     validatePuzzle() {
         const isValid = this.solver.isValidState(this.playerGrid);
         const message = isValid ? 
-            'The current state is valid! Keep going!' : 
-            'There are conflicts in the current state. Check for duplicate numbers.';
+            (window.i18n ? window.i18n.t('messages.validState') : 'The current state is valid! Keep going!') : 
+            (window.i18n ? window.i18n.t('messages.invalidState') : 'There are conflicts in the current state. Check for duplicate numbers.');
         
         alert(message);
     }
 
     resetPuzzle() {
-        if (confirm('Are you sure you want to reset the puzzle? All progress will be lost.')) {
+        const message = window.i18n ? window.i18n.t('messages.resetConfirm') : 'Are you sure you want to reset the puzzle? All progress will be lost.';
+        if (confirm(message)) {
             this.playerGrid = this.solver.copyGrid(this.originalGrid);
             this.playerNotes = {};
             this.mistakes = 0;
@@ -464,8 +511,18 @@ class SudokuGame {
             btn.classList.remove('active');
         });
         document.querySelector(`[data-difficulty="${difficulty}"]`).classList.add('active');
-        document.getElementById('current-difficulty').textContent = 
+        const difficultyMap = {
+            'easy': 'difficulty.easy',
+            'medium': 'difficulty.medium',
+            'hard': 'difficulty.hard',
+            'expert': 'difficulty.expert'
+        };
+        
+        const difficultyText = window.i18n && difficultyMap[difficulty] ? 
+            window.i18n.t(difficultyMap[difficulty]) : 
             difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+        
+        document.getElementById('current-difficulty').textContent = difficultyText;
         
         this.generateNewPuzzle();
     }
@@ -483,8 +540,18 @@ class SudokuGame {
         const finalTime = document.getElementById('timer').textContent;
         
         document.getElementById('final-time').textContent = finalTime;
-        document.getElementById('final-difficulty').textContent = 
+        const difficultyMap = {
+            'easy': 'difficulty.easy',
+            'medium': 'difficulty.medium',
+            'hard': 'difficulty.hard',
+            'expert': 'difficulty.expert'
+        };
+        
+        const difficultyText = window.i18n && difficultyMap[this.currentDifficulty] ? 
+            window.i18n.t(difficultyMap[this.currentDifficulty]) : 
             this.currentDifficulty.charAt(0).toUpperCase() + this.currentDifficulty.slice(1);
+        
+        document.getElementById('final-difficulty').textContent = difficultyText;
         document.getElementById('final-mistakes').textContent = this.mistakes;
         document.getElementById('final-hints').textContent = this.hintsUsed;
         

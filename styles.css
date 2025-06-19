@@ -5,10 +5,15 @@
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', 'Noto Sans TC', sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+}
+
+/* Traditional Chinese font support */
+html[lang="zh-TW"] {
+    font-family: 'Noto Sans TC', 'Roboto', sans-serif;
 }
 
 .container {
@@ -28,6 +33,45 @@ header h1 {
     font-weight: 700;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.language-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.language-selector-container label {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+#language-selector {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+#language-selector:focus {
+    outline: 2px solid rgba(255,255,255,0.8);
+    outline-offset: 2px;
 }
 
 .game-info {

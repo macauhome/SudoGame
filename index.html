@@ -6,19 +6,29 @@
     <title>Advanced Sudoku Game</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-th"></i> Advanced Sudoku</h1>
-            <div class="game-info">
-                <div class="timer">
-                    <i class="fas fa-clock"></i>
-                    <span id="timer">00:00</span>
+            <h1><i class="fas fa-th"></i> <span data-i18n="header.title">Advanced Sudoku</span></h1>
+            <div class="header-controls">
+                <div class="language-selector-container">
+                    <label for="language-selector" data-i18n="language.label">Language</label>
+                    <select id="language-selector">
+                        <option value="en" data-i18n="language.english">English</option>
+                        <option value="zh-TW" data-i18n="language.traditionalChinese">繁體中文</option>
+                    </select>
                 </div>
-                <div class="difficulty">
-                    <span id="current-difficulty">Easy</span>
+                <div class="game-info">
+                    <div class="timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer">00:00</span>
+                    </div>
+                    <div class="difficulty">
+                        <span id="current-difficulty" data-i18n="difficulty.easy">Easy</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -26,35 +36,35 @@
         <div class="game-container">
             <div class="controls-panel">
                 <div class="difficulty-selector">
-                    <h3>Difficulty</h3>
+                    <h3 data-i18n="header.difficulty">Difficulty</h3>
                     <div class="difficulty-buttons">
-                        <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
-                        <button class="difficulty-btn" data-difficulty="medium">Medium</button>
-                        <button class="difficulty-btn" data-difficulty="hard">Hard</button>
-                        <button class="difficulty-btn" data-difficulty="expert">Expert</button>
+                        <button class="difficulty-btn active" data-difficulty="easy" data-i18n="difficulty.easy">Easy</button>
+                        <button class="difficulty-btn" data-difficulty="medium" data-i18n="difficulty.medium">Medium</button>
+                        <button class="difficulty-btn" data-difficulty="hard" data-i18n="difficulty.hard">Hard</button>
+                        <button class="difficulty-btn" data-difficulty="expert" data-i18n="difficulty.expert">Expert</button>
                     </div>
                 </div>
 
                 <div class="game-controls">
                     <button id="new-game" class="control-btn primary">
-                        <i class="fas fa-plus"></i> New Game
+                        <i class="fas fa-plus"></i> <span data-i18n="controls.newGame">New Game</span>
                     </button>
                     <button id="solve" class="control-btn">
-                        <i class="fas fa-magic"></i> Solve
+                        <i class="fas fa-magic"></i> <span data-i18n="controls.solve">Solve</span>
                     </button>
                     <button id="hint" class="control-btn">
-                        <i class="fas fa-lightbulb"></i> Hint
+                        <i class="fas fa-lightbulb"></i> <span data-i18n="controls.hint">Hint</span>
                     </button>
                     <button id="validate" class="control-btn">
-                        <i class="fas fa-check"></i> Validate
+                        <i class="fas fa-check"></i> <span data-i18n="controls.validate">Validate</span>
                     </button>
                     <button id="reset" class="control-btn danger">
-                        <i class="fas fa-undo"></i> Reset
+                        <i class="fas fa-undo"></i> <span data-i18n="controls.reset">Reset</span>
                     </button>
                 </div>
 
                 <div class="number-pad">
-                    <h3>Number Pad</h3>
+                    <h3 data-i18n="controls.numberPad">Number Pad</h3>
                     <div class="number-buttons">
                         <button class="number-btn" data-number="1">1</button>
                         <button class="number-btn" data-number="2">2</button>
@@ -72,17 +82,17 @@
                 </div>
 
                 <div class="game-stats">
-                    <h3>Statistics</h3>
+                    <h3 data-i18n="statistics.title">Statistics</h3>
                     <div class="stat-item">
-                        <span>Mistakes:</span>
+                        <span data-i18n="statistics.mistakes">Mistakes:</span>
                         <span id="mistakes-count">0</span>
                     </div>
                     <div class="stat-item">
-                        <span>Hints Used:</span>
+                        <span data-i18n="statistics.hintsUsed">Hints Used:</span>
                         <span id="hints-count">0</span>
                     </div>
                     <div class="stat-item">
-                        <span>Completion:</span>
+                        <span data-i18n="statistics.completion">Completion:</span>
                         <span id="completion-percent">0%</span>
                     </div>
                 </div>
@@ -96,15 +106,15 @@
                 <div class="game-modes">
                     <label class="mode-toggle">
                         <input type="checkbox" id="notes-mode">
-                        <span>Notes Mode</span>
+                        <span data-i18n="modes.notesMode">Notes Mode</span>
                     </label>
                     <label class="mode-toggle">
                         <input type="checkbox" id="highlight-mode" checked>
-                        <span>Highlight Similar</span>
+                        <span data-i18n="modes.highlightSimilar">Highlight Similar</span>
                     </label>
                     <label class="mode-toggle">
                         <input type="checkbox" id="auto-validate" checked>
-                        <span>Auto Validate</span>
+                        <span data-i18n="modes.autoValidate">Auto Validate</span>
                     </label>
                 </div>
             </div>
@@ -112,30 +122,31 @@
 
         <div id="victory-modal" class="modal">
             <div class="modal-content">
-                <h2><i class="fas fa-trophy"></i> Congratulations!</h2>
-                <p>You've successfully completed the Sudoku puzzle!</p>
+                <h2><i class="fas fa-trophy"></i> <span data-i18n="modal.congratulations">Congratulations!</span></h2>
+                <p data-i18n="modal.completedMessage">You've successfully completed the Sudoku puzzle!</p>
                 <div class="victory-stats">
                     <div class="victory-stat">
-                        <strong>Time:</strong> <span id="final-time"></span>
+                        <strong data-i18n="modal.time">Time:</strong> <span id="final-time"></span>
                     </div>
                     <div class="victory-stat">
-                        <strong>Difficulty:</strong> <span id="final-difficulty"></span>
+                        <strong data-i18n="modal.difficulty">Difficulty:</strong> <span id="final-difficulty"></span>
                     </div>
                     <div class="victory-stat">
-                        <strong>Mistakes:</strong> <span id="final-mistakes"></span>
+                        <strong data-i18n="modal.mistakes">Mistakes:</strong> <span id="final-mistakes"></span>
                     </div>
                     <div class="victory-stat">
-                        <strong>Hints:</strong> <span id="final-hints"></span>
+                        <strong data-i18n="modal.hints">Hints:</strong> <span id="final-hints"></span>
                     </div>
                 </div>
                 <div class="modal-buttons">
-                    <button id="play-again" class="control-btn primary">Play Again</button>
-                    <button id="close-modal" class="control-btn">Close</button>
+                    <button id="play-again" class="control-btn primary" data-i18n="modal.playAgain">Play Again</button>
+                    <button id="close-modal" class="control-btn" data-i18n="modal.close">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="sudoku-solver.js"></script>
     <script src="sudoku-generator.js"></script>
     <script src="game.js"></script>

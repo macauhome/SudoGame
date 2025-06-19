@@ -1,0 +1,54 @@
+{
+  "title": "進階數獨遊戲",
+  "header": {
+    "title": "進階數獨",
+    "timer": "計時器",
+    "difficulty": "難度"
+  },
+  "difficulty": {
+    "easy": "簡單",
+    "medium": "中等",
+    "hard": "困難",
+    "expert": "專家"
+  },
+  "controls": {
+    "newGame": "新遊戲",
+    "solve": "解答",
+    "hint": "提示",
+    "validate": "驗證",
+    "reset": "重置",
+    "numberPad": "數字鍵盤"
+  },
+  "modes": {
+    "notesMode": "筆記模式",
+    "highlightSimilar": "高亮相同數字",
+    "autoValidate": "自動驗證"
+  },
+  "statistics": {
+    "title": "統計資料",
+    "mistakes": "錯誤次數",
+    "hintsUsed": "使用提示",
+    "completion": "完成度"
+  },
+  "modal": {
+    "congratulations": "恭喜！",
+    "completedMessage": "您已成功完成數獨謎題！",
+    "time": "時間",
+    "difficulty": "難度",
+    "mistakes": "錯誤",
+    "hints": "提示",
+    "playAgain": "再玩一次",
+    "close": "關閉"
+  },
+  "messages": {
+    "solveConfirm": "您確定要解答謎題嗎？這將結束當前遊戲。",
+    "resetConfirm": "您確定要重置謎題嗎？所有進度將會丟失。",
+    "validState": "當前狀態有效！繼續加油！",
+    "invalidState": "當前狀態存在衝突。請檢查重複的數字。"
+  },
+  "language": {
+    "label": "語言",
+    "english": "English",
+    "traditionalChinese": "繁體中文"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "title": "Advanced Sudoku Game",
+  "header": {
+    "title": "Advanced Sudoku",
+    "timer": "Timer",
+    "difficulty": "Difficulty"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "expert": "Expert"
+  },
+  "controls": {
+    "newGame": "New Game",
+    "solve": "Solve",
+    "hint": "Hint",
+    "validate": "Validate",
+    "reset": "Reset",
+    "numberPad": "Number Pad"
+  },
+  "modes": {
+    "notesMode": "Notes Mode",
+    "highlightSimilar": "Highlight Similar",
+    "autoValidate": "Auto Validate"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "mistakes": "Mistakes",
+    "hintsUsed": "Hints Used",
+    "completion": "Completion"
+  },
+  "modal": {
+    "congratulations": "Congratulations!",
+    "completedMessage": "You've successfully completed the Sudoku puzzle!",
+    "time": "Time",
+    "difficulty": "Difficulty",
+    "mistakes": "Mistakes",
+    "hints": "Hints",
+    "playAgain": "Play Again",
+    "close": "Close"
+  },
+  "messages": {
+    "solveConfirm": "Are you sure you want to solve the puzzle? This will end the current game.",
+    "resetConfirm": "Are you sure you want to reset the puzzle? All progress will be lost.",
+    "validState": "The current state is valid! Keep going!",
+    "invalidState": "There are conflicts in the current state. Check for duplicate numbers."
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "traditionalChinese": "繁體中文"
+  }
+}
