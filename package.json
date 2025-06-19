@@ -1,0 +1,37 @@
+{
+  "name": "advanced-sudoku-game",
+  "version": "1.0.0",
+  "description": "An advanced web-based Sudoku game with multiple difficulty levels, hints, notes mode, and modern UI",
+  "main": "index.html",
+  "scripts": {
+    "start": "python server.py",
+    "test": "node test-runner.js",
+    "serve": "python -m http.server 12000",
+    "validate": "node -e \"console.log('Running validation...'); require('./test-runner.js')\""
+  },
+  "keywords": [
+    "sudoku",
+    "game",
+    "puzzle",
+    "javascript",
+    "html5",
+    "css3",
+    "web-game"
+  ],
+  "author": "OpenHands",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openhands/advanced-sudoku-game.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openhands/advanced-sudoku-game/issues"
+  },
+  "homepage": "https://github.com/openhands/advanced-sudoku-game#readme",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=16.0.0",
+    "python": ">=3.8"
+  }
+}

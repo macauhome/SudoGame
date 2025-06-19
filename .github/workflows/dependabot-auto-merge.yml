@@ -1,0 +1,187 @@
+name: Dependabot Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  dependabot-auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+        continue-on-error: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: |
+          # Install Node.js dependencies if package.json exists
+          if [ -f "package.json" ]; then
+            npm ci
+          fi
+          
+          # Install Python dependencies if requirements.txt exists
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+          
+          # Install Python dependencies if pyproject.toml exists
+          if [ -f "pyproject.toml" ]; then
+            pip install -e .
+          fi
+        continue-on-error: true
+
+      - name: Run tests
+        id: run-tests
+        run: |
+          # Set default test result
+          echo "test_result=success" >> $GITHUB_OUTPUT
+          
+          # Run Node.js tests if they exist
+          if [ -f "package.json" ] && npm run test --if-present; then
+            echo "Node.js tests passed"
+          elif [ -f "package.json" ]; then
+            echo "test_result=failed" >> $GITHUB_OUTPUT
+            echo "Node.js tests failed"
+            exit 1
+          fi
+          
+          # Run Python tests if they exist
+          if [ -f "pytest.ini" ] || [ -f "pyproject.toml" ] || [ -d "tests" ]; then
+            if command -v pytest &> /dev/null; then
+              pytest
+            elif python -m pytest; then
+              echo "Python tests passed"
+            else
+              echo "test_result=failed" >> $GITHUB_OUTPUT
+              echo "Python tests failed"
+              exit 1
+            fi
+          fi
+          
+          # Run basic validation for web projects
+          if [ -f "index.html" ]; then
+            echo "Validating HTML structure..."
+            # Basic HTML validation - check if file is valid
+            if ! python -c "
+import html.parser
+class HTMLValidator(html.parser.HTMLParser):
+    def error(self, message):
+        raise ValueError(message)
+try:
+    with open('index.html', 'r') as f:
+        validator = HTMLValidator()
+        validator.feed(f.read())
+    print('HTML validation passed')
+except Exception as e:
+    print(f'HTML validation failed: {e}')
+    exit(1)
+            "; then
+              echo "test_result=failed" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          fi
+          
+          # Check JavaScript syntax if JS files exist
+          if ls *.js 1> /dev/null 2>&1; then
+            echo "Validating JavaScript syntax..."
+            for js_file in *.js; do
+              if ! node -c "$js_file"; then
+                echo "test_result=failed" >> $GITHUB_OUTPUT
+                echo "JavaScript validation failed for $js_file"
+                exit 1
+              fi
+            done
+            echo "JavaScript validation passed"
+          fi
+        continue-on-error: false
+
+      - name: Wait for other checks
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'dependabot-auto-merge'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped,neutral
+        continue-on-error: true
+
+      - name: Get Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge Dependabot PRs
+        if: steps.run-tests.outputs.test_result == 'success'
+        run: |
+          # Get PR information
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          
+          # Check if this is a patch or minor update (safer to auto-merge)
+          UPDATE_TYPE="${{ steps.dependabot-metadata.outputs.update-type }}"
+          
+          echo "Update type: $UPDATE_TYPE"
+          echo "Package name: ${{ steps.dependabot-metadata.outputs.dependency-names }}"
+          
+          # Auto-merge patch and minor updates
+          if [[ "$UPDATE_TYPE" == "version-update:semver-patch" ]] || [[ "$UPDATE_TYPE" == "version-update:semver-minor" ]]; then
+            echo "Auto-merging $UPDATE_TYPE update..."
+            
+            # Enable auto-merge
+            gh pr merge $PR_NUMBER --auto --squash --delete-branch
+            
+            echo "✅ Auto-merge enabled for PR #$PR_NUMBER"
+          else
+            echo "⚠️  Major update detected. Skipping auto-merge for manual review."
+            
+            # Add a comment explaining why it wasn't auto-merged
+            gh pr comment $PR_NUMBER --body "🤖 **Dependabot Auto-Merge**
+
+This PR contains a **$UPDATE_TYPE** update and requires manual review before merging.
+
+- ✅ All tests are passing
+- ⚠️  Major version updates need manual approval for safety
+
+Please review the changes and merge manually if appropriate."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Handle test failures
+        if: steps.run-tests.outputs.test_result == 'failed'
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          
+          gh pr comment $PR_NUMBER --body "🤖 **Dependabot Auto-Merge**
+
+❌ **Tests failed** - Auto-merge cancelled
+
+The automated tests failed for this Dependabot update. Please review the test results and fix any issues before merging.
+
+Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details."
+          
+          echo "❌ Tests failed. Auto-merge cancelled."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

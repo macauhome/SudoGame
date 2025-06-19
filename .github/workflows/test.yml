@@ -1,0 +1,288 @@
+name: Test Sudoku Game
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Validate HTML structure
+        run: |
+          echo "Validating HTML files..."
+          python -c "
+import html.parser
+import sys
+import os
+
+class HTMLValidator(html.parser.HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.errors = []
+    
+    def error(self, message):
+        self.errors.append(message)
+
+def validate_html_file(filepath):
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        validator = HTMLValidator()
+        validator.feed(content)
+        
+        if validator.errors:
+            print(f'❌ HTML validation failed for {filepath}:')
+            for error in validator.errors:
+                print(f'  - {error}')
+            return False
+        else:
+            print(f'✅ HTML validation passed for {filepath}')
+            return True
+    except Exception as e:
+        print(f'❌ Error validating {filepath}: {e}')
+        return False
+
+# Find and validate all HTML files
+html_files = [f for f in os.listdir('.') if f.endswith('.html')]
+all_valid = True
+
+for html_file in html_files:
+    if not validate_html_file(html_file):
+        all_valid = False
+
+if not all_valid:
+    sys.exit(1)
+print('✅ All HTML files are valid')
+          "
+
+      - name: Validate JavaScript syntax
+        run: |
+          echo "Validating JavaScript files..."
+          for js_file in *.js; do
+            if [ -f "$js_file" ]; then
+              echo "Checking $js_file..."
+              if node -c "$js_file"; then
+                echo "✅ $js_file syntax is valid"
+              else
+                echo "❌ $js_file has syntax errors"
+                exit 1
+              fi
+            fi
+          done
+          echo "✅ All JavaScript files have valid syntax"
+
+      - name: Test Sudoku algorithms
+        run: |
+          echo "Testing Sudoku game algorithms..."
+          node -e "
+          // Load the Sudoku solver
+          const fs = require('fs');
+          
+          // Read and evaluate the solver
+          const solverCode = fs.readFileSync('sudoku-solver.js', 'utf8');
+          eval(solverCode);
+          
+          // Read and evaluate the generator
+          const generatorCode = fs.readFileSync('sudoku-generator.js', 'utf8');
+          eval(generatorCode);
+          
+          console.log('🧪 Testing SudokuSolver...');
+          
+          // Test solver with a known puzzle
+          const testPuzzle = [
+            [5,3,0,0,7,0,0,0,0],
+            [6,0,0,1,9,5,0,0,0],
+            [0,9,8,0,0,0,0,6,0],
+            [8,0,0,0,6,0,0,0,3],
+            [4,0,0,8,0,3,0,0,1],
+            [7,0,0,0,2,0,0,0,6],
+            [0,6,0,0,0,0,2,8,0],
+            [0,0,0,4,1,9,0,0,5],
+            [0,0,0,0,8,0,0,7,9]
+          ];
+          
+          const solver = new SudokuSolver();
+          
+          // Test validation
+          if (!solver.isValid(testPuzzle)) {
+            console.error('❌ Valid puzzle marked as invalid');
+            process.exit(1);
+          }
+          console.log('✅ Puzzle validation works');
+          
+          // Test solving
+          const solution = solver.solve([...testPuzzle.map(row => [...row])]);
+          if (!solution) {
+            console.error('❌ Failed to solve valid puzzle');
+            process.exit(1);
+          }
+          console.log('✅ Puzzle solving works');
+          
+          // Test that solution is complete
+          let complete = true;
+          for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+              if (solution[i][j] === 0) {
+                complete = false;
+                break;
+              }
+            }
+          }
+          
+          if (!complete) {
+            console.error('❌ Solution is not complete');
+            process.exit(1);
+          }
+          console.log('✅ Solution is complete');
+          
+          console.log('🧪 Testing SudokuGenerator...');
+          
+          // Test generator
+          const generator = new SudokuGenerator();
+          
+          // Test puzzle generation for each difficulty
+          const difficulties = ['easy', 'medium', 'hard', 'expert'];
+          
+          for (const difficulty of difficulties) {
+            console.log(\`Testing \${difficulty} puzzle generation...\`);
+            const puzzle = generator.generate(difficulty);
+            
+            if (!puzzle) {
+              console.error(\`❌ Failed to generate \${difficulty} puzzle\`);
+              process.exit(1);
+            }
+            
+            // Verify puzzle is valid
+            if (!solver.isValid(puzzle)) {
+              console.error(\`❌ Generated \${difficulty} puzzle is invalid\`);
+              process.exit(1);
+            }
+            
+            // Verify puzzle is solvable
+            const testSolution = solver.solve([...puzzle.map(row => [...row])]);
+            if (!testSolution) {
+              console.error(\`❌ Generated \${difficulty} puzzle is not solvable\`);
+              process.exit(1);
+            }
+            
+            console.log(\`✅ \${difficulty} puzzle generation works\`);
+          }
+          
+          console.log('✅ All Sudoku algorithm tests passed!');
+          "
+
+      - name: Test web server
+        run: |
+          echo "Testing web server..."
+          
+          # Start the server in background
+          python server.py &
+          SERVER_PID=$!
+          
+          # Wait for server to start
+          sleep 3
+          
+          # Test if server is responding
+          if curl -f http://localhost:12000/ > /dev/null 2>&1; then
+            echo "✅ Web server is responding"
+          else
+            echo "❌ Web server is not responding"
+            kill $SERVER_PID 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Test if HTML is served correctly
+          if curl -s http://localhost:12000/ | grep -q "Advanced Sudoku"; then
+            echo "✅ HTML content is served correctly"
+          else
+            echo "❌ HTML content is not served correctly"
+            kill $SERVER_PID 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Test CORS headers
+          if curl -s -I http://localhost:12000/ | grep -q "Access-Control-Allow-Origin"; then
+            echo "✅ CORS headers are present"
+          else
+            echo "❌ CORS headers are missing"
+            kill $SERVER_PID 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Clean up
+          kill $SERVER_PID 2>/dev/null || true
+          echo "✅ Web server tests passed"
+
+      - name: Validate CSS
+        run: |
+          echo "Validating CSS files..."
+          # Basic CSS validation - check for common syntax errors
+          for css_file in *.css; do
+            if [ -f "$css_file" ]; then
+              echo "Checking $css_file..."
+              
+              # Check for unmatched braces
+              if ! python -c "
+import sys
+with open('$css_file', 'r') as f:
+    content = f.read()
+    
+open_braces = content.count('{')
+close_braces = content.count('}')
+
+if open_braces != close_braces:
+    print(f'❌ Unmatched braces in $css_file: {open_braces} open, {close_braces} close')
+    sys.exit(1)
+else:
+    print(f'✅ $css_file has matching braces')
+              "; then
+                exit 1
+              fi
+            fi
+          done
+          echo "✅ All CSS files are valid"
+
+      - name: Check file structure
+        run: |
+          echo "Checking required files..."
+          
+          required_files=("index.html" "styles.css" "game.js" "sudoku-solver.js" "sudoku-generator.js" "server.py")
+          
+          for file in "${required_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✅ $file exists"
+            else
+              echo "❌ Required file $file is missing"
+              exit 1
+            fi
+          done
+          
+          echo "✅ All required files are present"
+
+      - name: Test summary
+        run: |
+          echo "🎉 All tests passed successfully!"
+          echo "✅ HTML validation"
+          echo "✅ JavaScript syntax validation"
+          echo "✅ Sudoku algorithms testing"
+          echo "✅ Web server testing"
+          echo "✅ CSS validation"
+          echo "✅ File structure validation"
