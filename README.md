@@ -1,4 +1,4 @@
-# Advanced Sudoku Game
+# Advanced Sudoku Game create by OpenHands AI
 
 A feature-rich, modern Sudoku game built with vanilla JavaScript, HTML5, and CSS3. This game offers multiple difficulty levels, intelligent puzzle generation, and a sleek user interface.
 
